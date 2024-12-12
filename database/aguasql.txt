@@ -1,0 +1,238 @@
+	CREATE VIEW vista_imprimir_2 AS(
+	SELECT fac.FacNro, 
+            CONCAT(PerNomPri, ' ', PerApePri, ' ', PerApeSeg) AS Usuario,
+            zon.ZonDsc AS Zona,
+            cli.CliCod AS Codigo_Cliente,
+            fac.FacFch AS Fecha_facturacion, 
+            fac.FacVen AS Fecha_vencimiento,
+            DATEDIFF(NOW(),fac.FacFch) AS dias
+            FROM factura fac, clientes cli, personas pers, zonas zon
+            WHERE cli.PerCi=pers.PerCi
+            AND fac.CliCod=cli.CliCod
+            AND cli.CliZona=zon.ZonCod
+            AND fac.FacEst = 'A'
+            AND FacNotificacion IS NULL
+            AND DATEDIFF(NOW(),fac.FacFch) BETWEEN 60 AND 89);DELIMITER $$
+
+ALTER ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `vista_imprimir_2` AS (
+SELECT
+  `fac`.`FacNro` AS `FacNro`,
+  CONCAT(`pers`.`PerNomPri`,' ',`pers`.`PerApePri`,' ',`pers`.`PerApeSeg`) AS `Usuario`,
+  `zon`.`ZonDsc` AS `Zona`,
+  `cli`.`CliCod` AS `Codigo_Cliente`,
+  `fac`.`FacFch` AS `Fecha_facturacion`,
+  `fac`.`FacVen` AS `Fecha_vencimiento`,
+  (TO_DAYS(NOW()) - TO_DAYS(`fac`.`FacFch`)) AS `dias`
+FROM (((`factura` `fac`
+     JOIN `clientes` `cli`)
+    JOIN `personas` `pers`)
+   JOIN `zonas` `zon`)
+WHERE ((`cli`.`PerCi` = `pers`.`PerCi`)
+       AND (`fac`.`CliCod` = `cli`.`CliCod`)
+       AND (`cli`.`CliZona` = `zon`.`ZonCod`)
+       AND (`fac`.`FacEst` = 'A')
+       AND ISNULL(`fac`.`FacNotificacion`)
+       AND ((TO_DAYS(NOW()) - TO_DAYS(`fac`.`FacFch`))BETWEEN 60
+            AND 89)))$$
+
+DELIMITER ;
+
+
+	CREATE VIEW vista_imprimir_3 AS(
+	SELECT fac.FacNro, 
+            CONCAT(PerNomPri, ' ', PerApePri, ' ', PerApeSeg) AS Usuario,
+            zon.ZonDsc AS Zona,
+            cli.CliCod AS Codigo_Cliente,
+            fac.FacFch AS Fecha_facturacion, 
+            fac.FacVen AS Fecha_vencimiento,
+            DATEDIFF(NOW(),fac.FacFch) AS dias
+            FROM factura fac, clientes cli, personas pers, zonas zon
+            WHERE cli.PerCi=pers.PerCi
+            AND fac.CliCod=cli.CliCod
+/*2*/
+SELECT CONCAT(PerNomPri, ' ', PerApePri, ' ', PerApeSeg) AS Usuario,
+zon.ZonDsc AS Zona,
+cli.CliCod AS Codigo_Cliente,
+CuoAnio AS Anio, 
+CuoMes Mes, 
+TipoCuo, 
+TipIvaDsc, 
+CuoVen AS Fecha_vencimiento, 
+CuoCan AS Fecha_pago,
+CuoFchAlt AS Fecha_facturacion,
+TipoCuoMnt AS monto,
+Notificacion,
+DATEDIFF(NOW(),CuoVen) AS dias
+FROM cuotas cuo, clientes cli, personas pers, zonas zon, tipoiva tipiva
+WHERE DATEDIFF(NOW(),CuoVen) BETWEEN 60 AND 89
+AND cuo.CliCod=cli.CliCod
+AND zon.ZonCod=cli.CliZona
+AND cli.PerCi=pers.PerCi
+AND tipiva.TipIvaCod=cuo.TipIvaCod
+AND CuoCan = '1000-01-01'
+AND cuo.CliCod=1723
+
+/*2-Vista*/
+CREATE VIEW vista_imprimir_2 AS (SELECT CONCAT(PerNomPri, ' ', PerApePri, ' ', PerApeSeg) AS Usuario,
+zon.ZonDsc AS Zona,
+cli.CliCod AS Codigo_Cliente,
+CuoAnio AS Anio, 
+CuoMes Mes, 
+TipoCuo, 
+TipIvaDsc, 
+CuoVen AS Fecha_vencimiento, 
+CuoCan AS Fecha_pago,
+CuoFchAlt AS Fecha_facturacion,
+TipoCuoMnt AS monto,
+Notificacion,
+DATEDIFF(NOW(),CuoVen) AS dias
+FROM cuotas cuo, clientes cli, personas pers, zonas zon, tipoiva tipiva
+WHERE DATEDIFF(NOW(),CuoVen) BETWEEN 60 AND 89
+AND cuo.CliCod=cli.CliCod
+AND zon.ZonCod=cli.CliZona
+AND cli.PerCi=pers.PerCi
+AND tipiva.TipIvaCod=cuo.TipIvaCod
+AND CuoCan = '1000-01-01'
+AND TipoCuo=1);
+
+DROP VIEW vista_imprimir_2
+
+SELECT SUM(TipoCuoMnt) FROM cuotas WHERE CliCod=569 AND DATEDIFF(NOW(),CuoVen) BETWEEN 1 AND 89
+
+SELECT *FROM cuotas WHERE CliCod=569 AND DATEDIFF(NOW(),CuoVen) BETWEEN 1 AND 89
+
+SELECT *FROM vista_imprimir_2 WHERE Codigo_Cliente=569
+
+
+/*---------3----------------*/
+CREATE VIEW vista_imprimir_3 AS (SELECT CONCAT(PerNomPri, ' ', PerApePri, ' ', PerApeSeg) AS Usuario,
+zon.ZonDsc AS Zona,
+cli.CliCod AS Codigo_Cliente,
+CuoAnio AS Anio, 
+CuoMes Mes, 
+TipoCuo, 
+TipIvaDsc, 
+CuoVen AS Fecha_vencimiento, 
+CuoCan AS Fecha_pago,
+CuoFchAlt AS Fecha_facturacion,
+TipoCuoMnt AS monto,
+Notificacion,
+DATEDIFF(NOW(),CuoVen) AS dias
+FROM cuotas cuo, clientes cli, personas pers, zonas zon, tipoiva tipiva
+WHERE DATEDIFF(NOW(),CuoVen) BETWEEN 90 AND 119
+AND cuo.CliCod=cli.CliCod
+AND zon.ZonCod=cli.CliZona
+AND cli.PerCi=pers.PerCi
+AND tipiva.TipIvaCod=cuo.TipIvaCod
+AND CuoCan = '1000-01-01'
+AND TipoCuo=1);
+
+SELECT CONCAT(PerNomPri, ' ', PerApePri, ' ', PerApeSeg) AS Usuario,
+            zon.ZonDsc AS Zona,
+            cli.CliCod AS Codigo_Cliente,
+            CuoAnio AS Anio, 
+            CuoMes Mes, 
+            TipoCuo, 
+            TipIvaDsc, 
+            CuoVen AS Fecha_vencimiento, 
+            CuoCan AS Fecha_pago,
+            CuoFchAlt AS Fecha_facturacion,
+            TipoCuoMnt AS monto,
+            DATEDIFF(NOW(),CuoVen) AS dias
+            FROM cuotas cuo, clientes cli, personas pers, zonas zon, tipoiva tipiva
+            WHERE DATEDIFF(NOW(),CuoVen) BETWEEN 90 AND 119
+            AND cuo.CliCod=cli.CliCod
+            AND zon.ZonCod=cli.CliZona
+            AND cli.PerCi=pers.PerCi
+            AND tipiva.TipIvaCod=cuo.TipIvaCod
+            AND CuoCan = '1000-01-01'
+            AND TipoCuo=1
+            AND Notificacion IS NULL
+            
+            SELECT COUNT( * ) AS numero FROM vista_imprimir_3
+            
+SELECT *FROM vista_imprimir_3 WHERE Codigo_Cliente=1052
+SELECT SUM(TipoCuoMnt) AS Total FROM cuotas 
+    WHERE CliCod=1052 AND DATEDIFF(NOW(),CuoVen) BETWEEN 1 AND 119
+    
+    
+    /*---------+3----------------*/
+CREATE VIEW vista_imprimir_desconexion AS (SELECT CONCAT(PerNomPri, ' ', PerApePri, ' ', PerApeSeg) AS Usuario,
+zon.ZonDsc AS Zona,
+cli.CliCod AS Codigo_Cliente,
+CuoAnio AS Anio, 
+CuoMes Mes, 
+TipoCuo, 
+TipIvaDsc, 
+CuoVen AS Fecha_vencimiento, 
+CuoCan AS Fecha_pago,
+CuoFchAlt AS Fecha_facturacion,
+TipoCuoMnt AS monto,
+Notificacion,
+DATEDIFF(NOW(),CuoVen) AS dias
+FROM cuotas cuo, clientes cli, personas pers, zonas zon, tipoiva tipiva
+WHERE DATEDIFF(NOW(),CuoVen) BETWEEN 120 AND 1000
+AND cuo.CliCod=cli.CliCod
+AND zon.ZonCod=cli.CliZona
+AND cli.PerCi=pers.PerCi
+AND tipiva.TipIvaCod=cuo.TipIvaCod
+AND CuoCan = '1000-01-01'
+AND TipoCuo=1);
+
+SELECT CONCAT(PerNomPri, ' ', PerApePri, ' ', PerApeSeg) AS Usuario,
+            zon.ZonDsc AS Zona,
+            cli.CliCod AS Codigo_Cliente,
+            CuoAnio AS Anio, 
+            CuoMes Mes, 
+            TipoCuo, 
+            TipIvaDsc, 
+            CuoVen AS Fecha_vencimiento, 
+            CuoCan AS Fecha_pago,
+            CuoFchAlt AS Fecha_facturacion,
+            TipoCuoMnt AS monto,
+            DATEDIFF(NOW(),CuoVen) AS dias
+            FROM cuotas cuo, clientes cli, personas pers, zonas zon, tipoiva tipiva
+            WHERE DATEDIFF(NOW(),CuoVen) BETWEEN 120 AND 1000
+            AND cuo.CliCod=cli.CliCod
+            AND zon.ZonCod=cli.CliZona
+            AND cli.PerCi=pers.PerCi
+            AND tipiva.TipIvaCod=cuo.TipIvaCod
+            AND CuoCan = '1000-01-01'
+            AND TipoCuo=1
+            AND Notificacion IS NULL
+            
+            SELECT COUNT( * ) AS numero FROM vista_imprimir_desconexion
+            
+SELECT *FROM vista_imprimir_desconexion WHERE Codigo_Cliente=1052
+SELECT SUM(TipoCuoMnt) AS Total FROM cuotas 
+    WHERE CliCod=1052 AND DATEDIFF(NOW(),CuoVen) BETWEEN 1 AND 1000
+    
+    DROP VIEW vista_imprimir_desconexion
+    
+    SELECT CONCAT(PerNomPri, ' ', PerApePri, ' ', PerApeSeg) AS Usuario,
+            zon.ZonDsc AS Zona,
+            cli.CliCod AS Codigo_Cliente,
+            CuoAnio AS Anio, 
+            CuoMes Mes, 
+            TipoCuo, 
+            TipIvaDsc, 
+            CuoVen AS Fecha_vencimiento, 
+            CuoCan AS Fecha_pago,
+            CuoFchAlt AS Fecha_facturacion,
+            TipoCuoMnt AS monto,
+            DATEDIFF(NOW(),CuoVen) AS dias
+            FROM cuotas cuo, clientes cli, personas pers, zonas zon, tipoiva tipiva
+            WHERE DATEDIFF(NOW(),CuoVen) BETWEEN 120 AND 1000
+            AND cuo.CliCod=cli.CliCod
+            AND zon.ZonCod=cli.CliZona
+            AND cli.PerCi=pers.PerCi
+            AND tipiva.TipIvaCod=cuo.TipIvaCod
+            AND CuoCan = '1000-01-01'
+            AND TipoCuo=1
+            AND Notificacion IS NULL
+            
+            SELECT *FROM clientes WHERE CliCod=1037
+            SELECT *FROM clientes WHERE CliCod=1039
+            SELECT SUM()
+
+Agregar campo Notificacion char 10 en cuotas
